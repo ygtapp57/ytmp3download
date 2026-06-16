@@ -30,9 +30,8 @@
         button {
             width: 100%; padding: 14px; border: none; border-radius: 10px;
             background-color: var(--button-color); color: var(--button-text);
-            font-size: 16px; font-weight: bold; cursor: pointer; width: 100%;
+            font-size: 16px; font-weight: bold; cursor: pointer;
         }
-        .status { margin-top: 15px; font-weight: bold; font-size: 14px; display: none; }
     </style>
 </head>
 <body>
@@ -40,8 +39,7 @@
         <h2>Müzik İndirici</h2>
         <p>YouTube linkini yapıştırıp MP3 olarak indirin.</p>
         <input type="text" id="url-input" placeholder="https://youtube.com...">
-        <button id="main-btn" onclick="sendLinkToBot()">🎵 MP3 Olarak Dönüştür</button>
-        <div id="status-text" class="status"></div>
+        <button onclick="sendLinkToBot()">🎵 MP3 Olarak Dönüştür</button>
     </div>
 
     <script>
@@ -50,53 +48,17 @@
 
         function sendLinkToBot() {
             const urlInput = document.getElementById('url-input').value;
-            const statusDiv = document.getElementById('status-text');
-            const btn = document.getElementById('main-btn');
-            
-            if(!urlInput) return;
-            
-            const cleanUrl = String(urlInput).trim();
-            const userId = tg.initDataUnsafe?.user?.id;
-            
-            if(!userId) {
-                alert("Telegram kullanıcı bilgisi alınamadı!");
+            if(!urlInput) {
+                alert("Lütfen bir link girin!");
                 return;
             }
-
-            btn.disabled = true;
-            statusDiv.style.display = "block";
-            statusDiv.innerText = "⏳ İşlem sırasına alınıyor, lütfen bekleyin...";
-
-            // 🌟 KESİN ÇÖZÜM: Telegram'ın tg.sendData kısıtlamasını aşmak için
-            // Veriyi doğrudan resmi Telegram API üzerinden bota mesaj olarak fırlatıyoruz.
-            // Bu sayede bilgisayarınız dış dünyaya kapalı olsa bile Telegram sunucuları mesajı Debian'a iletir.
-            // ⚠️ BURAYA KENDİ BOT TOKENINIZI YAZIN:
-            const botToken = "8869529049:AAGP2OzUWYC539uIB_nje_jYAlqs34fBOiM"; 
             
-            const telegramApiUrl = `https://telegram.org{botToken}/sendMessage`;
+            // 🌟 EN GARANTİ YÖNTEM: Telefonun işletim sistemini (iOS/Android) yormadan,
+            // Linki doğrudan bota kopyalanmış hazır bir mesaj olarak fırlatır.
+            // Kullanıcı tek tıkla gönder butonuna basarak indirmeyi başlatır.
+            window.location.href = "https://t.me" + encodeURIComponent(urlInput);
             
-            fetch(telegramApiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: userId,
-                    text: cleanUrl
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.ok) {
-                    statusDiv.innerText = "✅ Başarılı! Dönüştürme başlatıldı. Sayfa kapanıyor...";
-                    setTimeout(() => { tg.close(); }, 1500);
-                } else {
-                    statusDiv.innerText = "❌ Mesaj gönderilemedi. Lütfen önce bota en az bir mesaj yazın.";
-                    btn.disabled = false;
-                }
-            })
-            .catch(() => {
-                statusDiv.innerText = "❌ Bağlantı hatası oluştu.";
-                btn.disabled = false;
-            });
+            setTimeout(() => { tg.close(); }, 500);
         }
     </script>
 </body>
