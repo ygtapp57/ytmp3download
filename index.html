@@ -38,7 +38,7 @@
     <div class="container">
         <h2>Müzik İndirici</h2>
         <p>YouTube linkini yapıştırıp MP3 olarak indirin.</p>
-        <input type="text" id="url-input" placeholder="https://youtube.com...">
+        <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=...">
         <button onclick="sendLinkToBot()">🎵 MP3 Olarak Dönüştür</button>
     </div>
 
@@ -47,23 +47,16 @@
         tg.expand();
 
         function sendLinkToBot() {
-    const urlInput = document.getElementById('url-input').value;
-    
-    // Boşlukları temizle ve metin haline getir
-    const cleanUrl = String(urlInput).trim(); 
-    
-    if(!cleanUrl) {
-        alert("Lütfen geçerli bir link girin!");
-        return;
-    }
-    
-    // 🌟 KESİN ÇÖZÜM: Telegram'a veriyi string olarak zorla gönderiyoruz
-    tg.sendData(cleanUrl); 
-    
-    // Sayfayı kapat
-    setTimeout(() => { tg.close(); }, 100);
-}
-
+            const urlInput = document.getElementById('url-input').value;
+            if(!urlInput) return;
+            
+            // Telegram'ın güvenle kabul edeceği saf metin formatı
+            const textToSend = String(urlInput).trim();
+            
+            // Veriyi fırlat ve ekranı kapat
+            tg.sendData(textToSend);
+            tg.close();
+        }
     </script>
 </body>
 </html>
