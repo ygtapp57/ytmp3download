@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium MP3 Converter</title>
+    <title>Premium mP3 Converter</title>
     <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0e0e10; color: #ffffff; text-align: center; padding: 50px 20px; margin: 0; }
         .container { max-width: 450px; margin: 0 auto; background: #18181b; padding: 40px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid #27272a; }
@@ -14,8 +14,6 @@
         button { width: 100%; padding: 16px; border: none; border-radius: 10px; background: #a855f7; color: #ffffff; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: #c084fc; transform: translateY(-1px); }
         button:disabled { background: #27272a; color: #52525b; cursor: not-allowed; transform: none; }
-        
-        /* 🎛️ HAREKETLİ YÜKLEME BARI TASARIMI */
         .progress-area { margin-top: 25px; display: none; text-align: left; }
         .progress-status { font-size: 14px; font-weight: bold; color: #e4e4e7; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .progress-bar-bg { width: 100%; height: 10px; background: #27272a; border-radius: 20px; overflow: hidden; }
@@ -29,9 +27,8 @@
     <p>YouTube veya YT Music linkini girin, anında tarayıcınıza indirin.</p>
     
     <input type="text" id="url-input" placeholder="https://youtube.com...">
-    <button id="btn" onclick="startDownload()">⚡ MP3 Olarak İndir</button>
+    <button id="btn">⚡ MP3 Olarak İndir</button>
     
-    <!-- Canlı İlerleme Çubuğu -->
     <div id="progress-zone" class="progress-area">
         <div class="progress-status">
             <span id="status-text">Analiz ediliyor...</span>
@@ -44,7 +41,9 @@
 </div>
 
 <script>
-function startDownload() {
+// 🌟 Kesin Çözüm: Butonun tıklama olayını HTML içinden değil, JavaScript içinden doğrudan bağlıyoruz.
+// Böylece "is not defined" (tanımlanmadı) hatası alma ihtimali tamamen ortadan kalkıyor.
+document.getElementById('btn').addEventListener('click', function() {
     const url = document.getElementById('url-input').value.trim();
     const pZone = document.getElementById('progress-zone');
     const bFill = document.getElementById('bar-fill');
@@ -57,12 +56,13 @@ function startDownload() {
     btn.disabled = true;
     pZone.style.display = "block";
     
-    // Adım 1: Analiz Başlatılıyor
-    updateProgress("🔍 Video analiz ediliyor (Max 7 Dk)...", 15);
+    // Aşama 1: Başlangıç
+    sText.innerText = "🔍 Video analiz ediliyor (Max 7 Dk)...";
+    pText.innerText = "15%";
+    bFill.style.width = "15%";
 
-    // 🔒 Cloudflare Tunnel kurduğumuzda bize vereceği güvenli tünel linkini buraya yazacağız.
-    // Şimdilik taslak olarak bırakıyoruz, tüneli açınca güncelleyeceğiz.
-    const apiEndpoint = "https://9fc989911bd576.lhr.life/api/download";
+    // Tünel Adresiniz
+    const apiEndpoint = "https://lhr.life";
 
     fetch(apiEndpoint, {
         method: 'POST',
@@ -70,37 +70,38 @@ function startDownload() {
         body: JSON.stringify({ url: url })
     })
     .then(res => {
-        if (!res.ok) throw new Error("Süre sınırı veya hak limiti aşıldı.");
-        updateProgress("📥 MP3 dönüştürülüyor...", 60);
-        return res.blob(); // Gelen müzik dosyasını hafızaya al
+        if (!res.ok) throw new Error("İndirme motoru hatası veya süre sınırı engeli.");
+        sText.innerText = "📥 MP3 dönüştürülüyor...";
+        pText.innerText = "60%";
+        bFill.style.width = "60%";
+        return res.blob();
     })
     .then(blob => {
-        updateProgress("📤 Dosya tarayıcıya aktarılıyor...", 95);
+        sText.innerText = "📤 Dosya tarayıcıya aktarılıyor...";
+        pText.innerText = "95%";
+        bFill.style.width = "95%";
         
-        # Dosyayı otomatik olarak kullanıcının bilgisayarına/telefonuna indirtiyoruz
         const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = "music.mp3"; // İleride gerçek şarkı adı yaptıracağız
+        a.download = "music.mp3";
         document.body.appendChild(a);
         a.click();
         a.remove();
 
-        updateProgress("✅ İndirme Tamamlandı!", 100);
+        sText.innerText = "✅ İndirme Tamamlandı!";
+        pText.innerText = "100%";
+        bFill.style.width = "100%";
         setTimeout(() => { btn.disabled = false; pZone.style.display = "none"; }, 3000);
     })
     .catch(err => {
-        updateProgress("❌ Hata: " + err.message, 0);
+        sText.innerText = "❌ Hata: " + err.message;
+        pText.innerText = "0%";
+        bFill.style.width = "0%";
         bFill.style.backgroundColor = "#eb4444";
         btn.disabled = false;
     });
-}
-
-function updateProgress(text, percent) {
-    document.getElementById('status-text').innerText = text;
-    document.getElementById('percent-text').innerText = percent + "%";
-    document.getElementById('bar-fill').style.width = percent + "%";
-}
+});
 </script>
 
 </body>
