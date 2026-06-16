@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MP3 Downloader</title>
+    <title>MP3 DownloadeR</title>
     <script src="https://telegram.org"></script>
     <style>
         :root {
@@ -30,7 +30,8 @@
         button {
             width: 100%; padding: 14px; border: none; border-radius: 10px;
             background-color: var(--button-color); color: var(--button-text);
-            font-size: 16px; font-weight: bold; cursor: pointer;
+            font-size: 16px; font-weight: bold; cursor: pointer; display: block;
+            text-decoration: none; text-align: center;
         }
     </style>
 </head>
@@ -38,26 +39,21 @@
     <div class="container">
         <h2>Müzik İndirici</h2>
         <p>YouTube linkini yapıştırıp MP3 olarak indirin.</p>
-        <input type="text" id="url-input" placeholder="https://youtube.com...">
-        <button onclick="sendLinkToBot()">🎵 MP3 Olarak Dönüştür</button>
+        
+        <!-- 🌟 KESİN ÇÖZÜM: JavaScript kullanmıyoruz. 
+             Doğrudan HTML Form yapısı ile Telegram'ın resmi paylaşım servisini tetikliyoruz. -->
+        <form id="share-form" action="https://t.me" method="GET">
+            <input type="text" id="url-input" name="url" placeholder="https://youtube.com..." required>
+            <button type="submit" onclick="closeAppDelayed()">🎵 MP3 Olarak Dönüştür</button>
+        </form>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function sendLinkToBot() {
-            const urlInput = document.getElementById('url-input').value;
-            if(!urlInput) {
-                alert("Lütfen bir link girin!");
-                return;
-            }
-            
-            // 🌟 EN GARANTİ YÖNTEM: Telefonun işletim sistemini (iOS/Android) yormadan,
-            // Linki doğrudan bota kopyalanmış hazır bir mesaj olarak fırlatır.
-            // Kullanıcı tek tıkla gönder butonuna basarak indirmeyi başlatır.
-            window.location.href = "https://t.me" + encodeURIComponent(urlInput);
-            
+        function closeAppDelayed() {
+            // Butona basıldığı an form yönlendirmesini yapar, yarım saniye sonra da ekranı kapatır.
             setTimeout(() => { tg.close(); }, 500);
         }
     </script>
