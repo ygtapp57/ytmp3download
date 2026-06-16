@@ -3,66 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesyonel Mp3 Dönüştürücü</title>
+    <title>Premium MP3 Converter</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #121214; color: #ffffff; text-align: center; padding: 50px 20px; margin: 0; }
-        .container { max-width: 500px; margin: 0 auto; background: #202024; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { font-size: 26px; color: #00ec5b; margin-bottom: 10px; }
-        p { color: #a8a8b3; font-size: 14px; margin-bottom: 30px; }
-        input { width: 100%; padding: 15px; box-sizing: border-box; border: 2px solid #29292e; border-radius: 8px; background: #121214; color: #fff; font-size: 16px; margin-bottom: 20px; outline: none; transition: 0.3s; }
-        input:focus { border-color: #00ec5b; }
-        button { width: 100%; padding: 16px; border: none; border-radius: 8px; background: #00ec5b; color: #121214; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #00ff62; transform: translateY(-2px); }
-        button:disabled { background: #29292e; color: #7c7c8a; cursor: not-allowed; transform: none; }
-        .status { margin-top: 20px; padding: 12px; border-radius: 6px; font-weight: bold; display: none; font-size: 14px; }
-        .success { background: rgba(0, 236, 91, 0.1); color: #00ec5b; }
-        .error { background: rgba(235, 68, 68, 0.1); color: #eb4444; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0e0e10; color: #ffffff; text-align: center; padding: 50px 20px; margin: 0; }
+        .container { max-width: 450px; margin: 0 auto; background: #18181b; padding: 40px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid #27272a; }
+        h1 { font-size: 24px; color: #a855f7; margin-bottom: 8px; }
+        p { color: #71717a; font-size: 14px; margin-bottom: 30px; }
+        input { width: 100%; padding: 16px; box-sizing: border-box; border: 2px solid #27272a; border-radius: 10px; background: #09090b; color: #fff; font-size: 16px; margin-bottom: 20px; outline: none; transition: 0.3s; }
+        input:focus { border-color: #a855f7; }
+        button { width: 100%; padding: 16px; border: none; border-radius: 10px; background: #a855f7; color: #ffffff; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #c084fc; transform: translateY(-1px); }
+        button:disabled { background: #27272a; color: #52525b; cursor: not-allowed; transform: none; }
+        
+        /* 🎛️ HAREKETLİ YÜKLEME BARI TASARIMI */
+        .progress-area { margin-top: 25px; display: none; text-align: left; }
+        .progress-status { font-size: 14px; font-weight: bold; color: #e4e4e7; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .progress-bar-bg { width: 100%; height: 10px; background: #27272a; border-radius: 20px; overflow: hidden; }
+        .progress-bar-fill { width: 0%; height: 10px; background: linear-gradient(90deg, #a855f7, #6366f1); border-radius: 20px; transition: width 0.4s ease; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Müzik İndirme Merkezi</h1>
-    <p>YouTube linkini yapıştırın, MP3 dosyanız anında Telegram hesabınıza gelsin!</p>
+    <p>YouTube veya YT Music linkini girin, anında tarayıcınıza indirin.</p>
     
     <input type="text" id="url-input" placeholder="https://youtube.com...">
-    <button id="submit-btn" onclick="sendToServer()">⚡ MP3 Olarak İndir</button>
+    <button id="btn" onclick="startDownload()">⚡ MP3 Olarak İndir</button>
     
-    <div id="status-box" class="status"></div>
+    <!-- Canlı İlerleme Çubuğu -->
+    <div id="progress-zone" class="progress-area">
+        <div class="progress-status">
+            <span id="status-text">Analiz ediliyor...</span>
+            <span id="percent-text">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="bar-fill" class="progress-bar-fill"></div>
+        </div>
+    </div>
 </div>
 
 <script>
-function sendToServer() {
-    const urlInput = document.getElementById('url-input').value.trim();
-    const statusBox = document.getElementById('status-box');
-    const btn = document.getElementById('submit-btn');
-    
-    if(!urlInput) {
-        alert("Lütfen geçerli bir YouTube linki girin!");
-        return;
-    }
+function startDownload() {
+    const url = document.getElementById('url-input').value.trim();
+    const pZone = document.getElementById('progress-zone');
+    const bFill = document.getElementById('bar-fill');
+    const sText = document.getElementById('status-text');
+    const pText = document.getElementById('percent-text');
+    const btn = document.getElementById('btn');
+
+    if(!url) { alert("Lütfen link girin!"); return; }
 
     btn.disabled = true;
-    statusBox.style.display = "block";
-    statusBox.className = "status success";
-    statusBox.innerText = "⏳ İstek alındı! Sistem sizi Telegram'a yönlendiriyor, lütfen indirmeyi oradan takip edin...";
+    pZone.style.display = "block";
+    
+    // Adım 1: Analiz Başlatılıyor
+    updateProgress("🔍 Video analiz ediliyor (Max 7 Dk)...", 15);
 
-    // 🌟 EN ÖNEMLİ KISIM: Kullanıcıyı botunuza yönlendirirken linki hafızaya alıyoruz.
-    // Kullanıcı bota girdiğinde link otomatik olarak bota iletilmiş olacak (Deep Linking)
-    // ⚠️ "botunuzun_kullanici_adi" kısmını bizzat kendi botunuzun kullanıcı adıyla değiştirin (Örn: my_mp3_bot)
-    const botUsername = "yt_mp3_dwn_bot";
-    
-    // YouTube linkindeki benzersiz 11 haneli video ID'sini çekiyoruz
-    const videoIdMatch = urlInput.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
-    
-    if(videoIdMatch && videoIdMatch[1]) {
-        // Linki şifreli bir parametre gibi bota gönderiyoruz (/start vid_XXXXX şeklinde)
-        window.location.href = `https://t.me{botUsername}?start=vid_${videoIdMatch[1]}`;
-    } else {
-        statusBox.className = "status error";
-        statusBox.innerText = "❌ Geçersiz YouTube linki formatı!";
+    // 🔒 Cloudflare Tunnel kurduğumuzda bize vereceği güvenli tünel linkini buraya yazacağız.
+    // Şimdilik taslak olarak bırakıyoruz, tüneli açınca güncelleyeceğiz.
+    const apiEndpoint = "https://MP3_API_TUNEL_://trycloudflare.com";
+
+    fetch(apiEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Süre sınırı veya hak limiti aşıldı.");
+        updateProgress("📥 MP3 dönüştürülüyor...", 60);
+        return res.blob(); // Gelen müzik dosyasını hafızaya al
+    })
+    .then(blob => {
+        updateProgress("📤 Dosya tarayıcıya aktarılıyor...", 95);
+        
+        # Dosyayı otomatik olarak kullanıcının bilgisayarına/telefonuna indirtiyoruz
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = "music.mp3"; // İleride gerçek şarkı adı yaptıracağız
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        updateProgress("✅ İndirme Tamamlandı!", 100);
+        setTimeout(() => { btn.disabled = false; pZone.style.display = "none"; }, 3000);
+    })
+    .catch(err => {
+        updateProgress("❌ Hata: " + err.message, 0);
+        bFill.style.backgroundColor = "#eb4444";
         btn.disabled = false;
-    }
+    });
+}
+
+function updateProgress(text, percent) {
+    document.getElementById('status-text').innerText = text;
+    document.getElementById('percent-text').innerText = percent + "%";
+    document.getElementById('bar-fill').style.width = percent + "%";
 }
 </script>
 
