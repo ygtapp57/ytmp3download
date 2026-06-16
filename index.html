@@ -3,70 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT MP3 Downloader</title>
-    <!-- Resmi Telegram Web App SDK Kütüphanesi -->
-    <script src="https://telegram.org"></script>
+    <title>Profesyonel MP3 Dönüştürücü</title>
     <style>
-        :root {
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #000000);
-            --button-color: var(--tg-theme-button-color, #2481cc);
-            --button-text: var(--tg-theme-button-text-color, #ffffff);
-            --hint-color: var(--tg-theme-hint-color, #999999);
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color); color: var(--text-color);
-            margin: 0; padding: 20px; text-align: center;
-        }
-        .container { max-width: 400px; margin: 0 auto; padding-top: 20px; }
-        h2 { font-size: 22px; margin-bottom: 5px; }
-        p { color: var(--hint-color); font-size: 14px; margin-bottom: 25px; }
-        input {
-            width: 100%; padding: 12px; box-sizing: border-box;
-            border: 1px solid var(--hint-color); border-radius: 10px;
-            background: transparent; color: var(--text-color);
-            font-size: 16px; margin-bottom: 15px; outline: none;
-        }
-        button {
-            width: 100%; padding: 14px; border: none; border-radius: 10px;
-            background-color: var(--button-color); color: var(--button-text);
-            font-size: 16px; font-weight: bold; cursor: pointer;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #121214; color: #ffffff; text-align: center; padding: 50px 20px; margin: 0; }
+        .container { max-width: 500px; margin: 0 auto; background: #202024; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 26px; color: #00ec5b; margin-bottom: 10px; }
+        p { color: #a8a8b3; font-size: 14px; margin-bottom: 30px; }
+        input { width: 100%; padding: 15px; box-sizing: border-box; border: 2px solid #29292e; border-radius: 8px; background: #121214; color: #fff; font-size: 16px; margin-bottom: 20px; outline: none; transition: 0.3s; }
+        input:focus { border-color: #00ec5b; }
+        button { width: 100%; padding: 16px; border: none; border-radius: 8px; background: #00ec5b; color: #121214; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #00ff62; transform: translateY(-2px); }
+        button:disabled { background: #29292e; color: #7c7c8a; cursor: not-allowed; transform: none; }
+        .status { margin-top: 20px; padding: 12px; border-radius: 6px; font-weight: bold; display: none; font-size: 14px; }
+        .success { background: rgba(0, 236, 91, 0.1); color: #00ec5b; }
+        .error { background: rgba(235, 68, 68, 0.1); color: #eb4444; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Müzik İndirici</h2>
-        <p>YouTube linkini yapıştırıp MP3 olarak indirin.</p>
-        <input type="text" id="url-input" placeholder="https://youtube.com...">
-        <button onclick="sendLinkToBot()">🎵 MP3 Olarak Dönüştür</button>
-    </div>
 
-    <script>
-        // 1. Telegram WebApp nesnesini tanımlıyoruz
-        const tg = window.Telegram.WebApp;
-        
-        // 🌟 KRİTİK ADIM: Telegram'a uygulamanın tamamen yüklendiğini ve hazır olduğunu bildiriyoruz
-        tg.ready();
-        tg.expand();
+<div class="container">
+    <h1>Müzik İndirme Merkezi</h1>
+    <p>YouTube linkini yapıştırın, MP3 dosyanız anında Telegram hesabınıza gelsin!</p>
+    
+    <input type="text" id="url-input" placeholder="https://youtube.com...">
+    <button id="submit-btn" onclick="sendToServer()">⚡ MP3 Olarak İndir</button>
+    
+    <div id="status-box" class="status"></div>
+</div>
 
-        function sendLinkToBot() {
-            const urlInput = document.getElementById('url-input').value;
-            if(!urlInput) {
-                alert("Lütfen bir link girin!");
-                return;
-            }
-            
-            const cleanUrl = String(urlInput).trim();
-            
-            // 🌟 KESİN ÇÖZÜM: tg.ready() aktif olduğu için bu komut 
-            // artık veriyi doğrudan açık olan bota (sohbete) fırlatacak.
-            tg.sendData(cleanUrl);
-            
-            // Arayüzü kapatıp kullanıcının bota dönmesini sağla
-            tg.close();
-        }
-    </script>
+<script>
+function sendToServer() {
+    const urlInput = document.getElementById('url-input').value.trim();
+    const statusBox = document.getElementById('status-box');
+    const btn = document.getElementById('submit-btn');
+    
+    if(!urlInput) {
+        alert("Lütfen geçerli bir YouTube linki girin!");
+        return;
+    }
+
+    btn.disabled = true;
+    statusBox.style.display = "block";
+    statusBox.className = "status success";
+    statusBox.innerText = "⏳ İstek alındı! Sistem sizi Telegram'a yönlendiriyor, lütfen indirmeyi oradan takip edin...";
+
+    // 🌟 EN ÖNEMLİ KISIM: Kullanıcıyı botunuza yönlendirirken linki hafızaya alıyoruz.
+    // Kullanıcı bota girdiğinde link otomatik olarak bota iletilmiş olacak (Deep Linking)
+    // ⚠️ "botunuzun_kullanici_adi" kısmını bizzat kendi botunuzun kullanıcı adıyla değiştirin (Örn: my_mp3_bot)
+    const botUsername = "botunuzun_kullanici_adi";
+    
+    // YouTube linkindeki benzersiz 11 haneli video ID'sini çekiyoruz
+    const videoIdMatch = urlInput.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
+    
+    if(videoIdMatch && videoIdMatch[1]) {
+        // Linki şifreli bir parametre gibi bota gönderiyoruz (/start vid_XXXXX şeklinde)
+        window.location.href = `https://t.me{botUsername}?start=vid_${videoIdMatch[1]}`;
+    } else {
+        statusBox.className = "status error";
+        statusBox.innerText = "❌ Geçersiz YouTube linki formatı!";
+        btn.disabled = false;
+    }
+}
+</script>
+
 </body>
 </html>
