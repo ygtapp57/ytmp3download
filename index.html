@@ -47,16 +47,23 @@
         tg.expand();
 
         function sendLinkToBot() {
-            const url = document.getElementById('url-input').value;
-            if(!url) return;
-            
-            // 🔒 SIFIR RİSKLİ YÖNTEM: Linki internetten göndermek yerine, 
-            // kullanıcının kendi sohbet penceresine görünmez bir mesaj olarak fırlatır.
-            tg.sendData(url); 
-            
-            // Uygulamayı kapat, kullanıcı bota geri dönsün
-            tg.close();
-        }
+    const urlInput = document.getElementById('url-input').value;
+    
+    // Boşlukları temizle ve metin haline getir
+    const cleanUrl = String(urlInput).trim(); 
+    
+    if(!cleanUrl) {
+        alert("Lütfen geçerli bir link girin!");
+        return;
+    }
+    
+    // 🌟 KESİN ÇÖZÜM: Telegram'a veriyi string olarak zorla gönderiyoruz
+    tg.sendData(cleanUrl); 
+    
+    // Sayfayı kapat
+    setTimeout(() => { tg.close(); }, 100);
+}
+
     </script>
 </body>
 </html>
